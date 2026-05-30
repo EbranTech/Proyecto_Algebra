@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  kirchhoff-app:
+    build: .
+    container_name: kirchhoff-algebra-linear
+    ports:
+      - "8080:80"
+    restart: always
+    volumes:
+      - ./Resistenicas.html:/usr/share/nginx/html/index.html
+      - ./style.css:/usr/share/nginx/html/style.css

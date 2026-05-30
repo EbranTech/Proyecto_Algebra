@@ -1,0 +1,595 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ley de Kirchhoff — Álgebra Lineal</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+</head>
+<body>
+<div class="notebook">
+
+  <!-- binding holes -->
+  <div class="holes">
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── HERO ───────────────────────── -->
+    <div class="hero">
+      <h1>Ley de Kirchhoff<br>Circuito de 3 Mallas</h1>
+      <p>Aplicación de Álgebra Lineal · Sistemas de Ecuaciones 3×3</p>
+      <span class="circuit-badge">R₁=R₂=R₃=220 Ω &nbsp;·&nbsp; R₄=R₅=470 Ω &nbsp;·&nbsp; V₁=9 V</span>
+    </div>
+
+    <!-- ── TEMAS DE ÁLGEBRA LINEAL ──── -->
+    <section>
+      <div class="section-label label-top">
+        <div class="tag tag-top">Temas de Álgebra Lineal aplicados</div>
+      </div>
+      <div class="topics-grid">
+        <div class="topic-card">
+          <div class="num">1</div>
+          <div><div class="name">Sistemas de ecuaciones lineales</div><div class="where">KVL genera una ecuación por malla</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">2</div>
+          <div><div class="name">Representación matricial $Ax=b$</div><div class="where">Resistencias → A, corrientes → x, voltajes → b</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">3</div>
+          <div><div class="name">Operaciones elementales de fila</div><div class="where">Motor de Gauss-Jordan</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">4</div>
+          <div><div class="name">Determinantes (expansión de Laplace)</div><div class="where">Requerido por Cramer e Inversa</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">5</div>
+          <div><div class="name">Menores y cofactores $C_{ij}$</div><div class="where">Submatrices 2×2 con signo $(-1)^{i+j}$</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">6</div>
+          <div><div class="name">Matriz adjunta $\text{adj}(A)$</div><div class="where">Transpuesta de la matriz de cofactores</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">7</div>
+          <div><div class="name">Inversa de matriz $A^{-1}$</div><div class="where">$A^{-1} = \dfrac{\text{adj}(A)}{\det(A)}$</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">8</div>
+          <div class="name">Regla de Cramer</div><div class="where">$I_k = \dfrac{\det(A_k)}{\det(A)}$</div>
+        </div>
+        <div class="topic-card">
+          <div class="num">9</div>
+          <div><div class="name">Eliminación de Gauss-Jordan</div><div class="where">Reduce $[A|b]$ a la forma identidad</div></div>
+        </div>
+        <div class="topic-card">
+          <div class="num">10</div>
+          <div><div class="name">Consistencia del sistema</div><div class="where">$\det(A) \neq 0$ garantiza solución única</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SISTEMA DE ECUACIONES ──────── -->
+    <section>
+      <div class="sys-box">
+        <h3>El sistema de ecuaciones — origen en las mallas del circuito</h3>
+        <p>Aplicando KVL a cada malla (corrientes horarias $I_1, I_2, I_3$) y sustituyendo valores:</p>
+        <div class="math-box">
+          $$\begin{cases}
+            690\,I_1 - 470\,I_2 + 0\,I_3 = 9 \\[4pt]
+            -470\,I_1 + 1160\,I_2 - 470\,I_3 = 0 \\[4pt]
+            0\,I_1 - 470\,I_2 + 690\,I_3 = 0
+          \end{cases}$$
+        </div>
+        <p style="margin-top:8px">En forma matricial $Ax = b$:</p>
+        <div class="math-box">
+          $$\underbrace{\begin{pmatrix} 690 & -470 & 0 \\ -470 & 1160 & -470 \\ 0 & -470 & 690 \end{pmatrix}}_{A}
+          \underbrace{\begin{pmatrix} I_1 \\ I_2 \\ I_3 \end{pmatrix}}_{x}
+          = \underbrace{\begin{pmatrix} 9 \\ 0 \\ 0 \end{pmatrix}}_{b}$$
+        </div>
+        <p class="note" style="font-size:.88rem;color:#6a5a40;font-style:italic">
+          La diagonal principal de A siempre es la suma de todas las resistencias que toca esa malla.
+          Los elementos fuera de la diagonal son siempre negativos e iguales a la resistencia compartida entre las dos mallas.
+        </p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ -->
+    <!-- MÉTODO 1 — GAUSS-JORDAN         -->
+    <!-- ════════════════════════════════ -->
+    <section>
+      <div class="method-header m1-bg">
+        <div class="mnum">01</div>
+        <div>
+          <h2>Eliminación de Gauss-Jordan</h2>
+          <p>Reducir la matriz aumentada $[A\,|\,b]$ hasta obtener la identidad</p>
+        </div>
+      </div>
+      <div class="method-body m1-brd">
+
+        <!-- Paso 1 -->
+        <div class="step">
+          <div class="snum m1-num">1</div>
+          <div class="sbody">
+            <div class="op">Construir la <b>matriz aumentada</b> $[A\,|\,b]$</div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                690 & -470 & 0 & 9 \\
+                -470 & 1160 & -470 & 0 \\
+                0 & -470 & 690 & 0
+              \end{array}\right]$$
+            </div>
+            <div class="note">Los tres primeros valores de cada fila son los coeficientes; el cuarto es el voltaje de esa malla.</div>
+          </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="step">
+          <div class="snum m1-num">2</div>
+          <div class="sbody">
+            <div class="op">Hacer el pivote de la columna 1 igual a 1 &nbsp;$\rightarrow$ &nbsp; $\mathcal{R}_1 \leftarrow \frac{1}{690} \mathcal{R}_1$</div>
+            <div class="math-box">
+              $$F_1 : \quad \frac{690}{690}=1,\quad \frac{-470}{690}=-0.6812,\quad \frac{0}{690}=0,\quad \frac{9}{690}=0.01304$$
+            </div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                1 & -0.6812 & 0 & 0.01304 \\
+                -470 & 1160 & -470 & 0 \\
+                0 & -470 & 690 & 0
+              \end{array}\right]$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="step">
+          <div class="snum m1-num">3</div>
+          <div class="sbody">
+            <div class="op">Eliminar el $-470$ de la columna 1 en $\mathcal{R}_2$ &nbsp;$\rightarrow$ &nbsp; $\mathcal{R}_2 \leftarrow \mathcal{R}_2 + 470 \mathcal{R}_1$</div>
+            <div class="math-box">
+              $$\begin{aligned}
+                F_2[1]&: -470 + 470(1) = 0 \\
+                F_2[2]&: 1160 + 470(-0.6812) = 1160 - 320.16 = 839.84 \\
+                F_2[3]&: -470 + 470(0) = -470 \\
+                F_2[b]&: 0 + 470(0.01304) = 6.1304
+              \end{aligned}$$
+            </div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                1 & -0.6812 & 0 & 0.01304 \\
+                0 & 839.84 & -470 & 6.1304 \\
+                0 & -470 & 690 & 0
+              \end{array}\right]$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="step">
+          <div class="snum m1-num">4</div>
+          <div class="sbody">
+            <div class="op">Hacer el pivote de la columna 2 igual a 1 &nbsp;$\rightarrow$ &nbsp; $\mathcal{R}_2 \leftarrow \frac{1}{839.84} \mathcal{R}_2$</div>
+            <div class="math-box">
+              $$F_2 : \quad 1,\quad \frac{-470}{839.84}=-0.5596,\quad \frac{6.1304}{839.84}=0.0073$$
+            </div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                1 & -0.6812 & 0 & 0.01304 \\
+                0 & 1 & -0.5596 & 0.0073 \\
+                0 & -470 & 690 & 0
+              \end{array}\right]$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 5 -->
+        <div class="step">
+          <div class="snum m1-num">5</div>
+          <div class="sbody">
+            <div class="op">Eliminar el $-470$ de la columna 2 en $\mathcal{R}_3$ &nbsp;$\rightarrow$ &nbsp; $\mathcal{R}_3 \leftarrow \mathcal{R}_3 + 470 \mathcal{R}_2$</div>
+            <div class="math-box">
+              $$\begin{aligned}
+                F_3[2]&: -470 + 470(1) = 0 \\
+                F_3[3]&: 690 + 470(-0.5596) = 690 - 262.99 = 427.01 \\
+                F_3[b]&: 0 + 470(0.0073) = 3.431
+              \end{aligned}$$
+            </div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                1 & -0.6812 & 0 & 0.01304 \\
+                0 & 1 & -0.5596 & 0.0073 \\
+                0 & 0 & 427.01 & 3.431
+              \end{array}\right]$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 6 -->
+        <div class="step">
+          <div class="snum m1-num">6</div>
+          <div class="sbody">
+            <div class="op">Hacer el pivote de la columna 3 igual a 1 &nbsp;$\rightarrow$ &nbsp; $\mathcal{R}_3 \leftarrow \frac{1}{427.01} \mathcal{R}_3$</div>
+            <div class="math-box">
+              $$I_3 = \frac{3.431}{427.01} = 0.008035 \text{ A}$$
+            </div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                1 & -0.6812 & 0 & 0.01304 \\
+                0 & 1 & -0.5596 & 0.0073 \\
+                0 & 0 & 1 & 0.008035
+              \end{array}\right]$$
+            </div>
+            <div class="note">← Primera corriente leída directamente: $I_3 = 0.008035$ A</div>
+          </div>
+        </div>
+
+        <!-- Paso 7 -->
+        <div class="step">
+          <div class="snum m1-num">7</div>
+          <div class="sbody">
+            <div class="op">Eliminar el $-0.5596$ de $\mathcal{R}_2$ (sustitución hacia arriba) &nbsp;$\rightarrow$ &nbsp; $\mathcal{R}_2 \leftarrow \mathcal{R}_2 + 0.5596 \mathcal{R}_3$</div>
+            <div class="math-box">
+              $$F_2[b]: 0.0073 + 0.5596(0.008035) = 0.0073 + 0.004496 = 0.011796$$
+            </div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                1 & -0.6812 & 0 & 0.01304 \\
+                0 & 1 & 0 & 0.011796 \\
+                0 & 0 & 1 & 0.008035
+              \end{array}\right]$$
+            </div>
+            <div class="note">← Segunda corriente leída: $I_2 = 0.011796$ A</div>
+          </div>
+        </div>
+
+        <!-- Paso 8 -->
+        <div class="step">
+          <div class="snum m1-num">8</div>
+          <div class="sbody">
+            <div class="op">Eliminar el $-0.6812$ de $\mathcal{R}_1$ &nbsp;$\rightarrow$ &nbsp; $\mathcal{R}_1 \leftarrow \mathcal{R}_1 + 0.6812 \mathcal{R}_2$</div>
+            <div class="math-box">
+              $$F_1[b]: 0.01304 + 0.6812(0.011796) = 0.01304 + 0.008035 = 0.021075$$
+            </div>
+            <div class="math-box">
+              $$\left[\begin{array}{ccc|c}
+                1 & 0 & 0 & 0.021075 \\
+                0 & 1 & 0 & 0.011796 \\
+                0 & 0 & 1 & 0.008035
+              \end{array}\right]$$
+            </div>
+            <div class="note">Matriz identidad lograda. Las soluciones están en la última columna.</div>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <h4>Resultado — Método 1</h4>
+          <div class="result-row">
+            <div class="result-item"><div class="label">$I_1$</div><div class="val">21.1 mA</div></div>
+            <div class="result-item"><div class="label">$I_2$</div><div class="val">11.8 mA</div></div>
+            <div class="result-item"><div class="label">$I_3$</div><div class="val">&nbsp;8.0 mA</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ -->
+    <!-- MÉTODO 2 — REGLA DE CRAMER      -->
+    <!-- ════════════════════════════════ -->
+    <section>
+      <div class la="method-header m2-bg">
+        <div class="mnum">02</div>
+        <div>
+          <h2>Regla de Cramer</h2>
+          <p>$I_k = \dfrac{\det(A_k)}{\det(A)}$ &nbsp;—&nbsp; se reemplaza cada columna con el vector $b$</p>
+        </div>
+      </div>
+      <div class="method-body m2-brd">
+
+        <!-- Paso 1 -->
+        <div class="step">
+          <div class="snum m2-num">1</div>
+          <div class="sbody">
+            <div class="op">Calcular $\det(A)$ por expansión de Laplace en la primera fila</div>
+            <div class="math-box">
+              $$\det(A) = a_{11}C_{11} + a_{12}C_{12} + a_{13}C_{13}
+              = 690\,C_{11} + (-470)\,C_{12} + 0\,C_{13}$$
+            </div>
+            <p style="margin:6px 0 4px">Calculando cada cofactor:</p>
+            <div class="math-box">
+              $$C_{11} = (+1)\begin{vmatrix} 1160 & -470 \\ -470 & 690 \end{vmatrix}
+              = 1160(690) - (-470)(-470)
+              = 800{,}400 - 220{,}900 = 579{,}500$$
+            </div>
+            <div class="math-box">
+              $$C_{12} = (-1)\begin{vmatrix} -470 & -470 \\ 0 & 690 \end{vmatrix}
+              = -\bigl[(-470)(690) - (-470)(0)\bigr]
+              = -(-324{,}300) = +324{,}300$$
+            </div>
+            <div class="math-box">
+              $$\det(A) = 690(579{,}500) + (-470)(324{,}300)
+              = 399{,}855{,}000 - 152{,}421{,}000$$
+            </div>
+            <div class="math-box">
+              $$\boxed{\det(A) = 247{,}434{,}000}$$
+            </div>
+            <div class="note">Como $\det(A) \neq 0$, el sistema tiene solución única.</div>
+          </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="step">
+          <div class="snum m2-num">2</div>
+          <div class="sbody">
+            <div class="op">Calcular $\det(A_1)$ — se reemplaza la <b>columna 1</b> con $b = (9,0,0)^T$</div>
+            <div class="math-box">
+              $$A_1 = \begin{pmatrix} 9 & -470 & 0 \\ 0 & 1160 & -470 \\ 0 & -470 & 690 \end{pmatrix}$$
+            </div>
+            <div class="math-box">
+              $$\det(A_1) = 9 \cdot \begin{vmatrix} 1160 & -470 \\ -470 & 690 \end{vmatrix}
+              = 9 \cdot (800{,}400 - 220{,}900)
+              = 9 \times 579{,}500 = 5{,}215{,}500$$
+            </div>
+            <div class="math-box">
+              $$I_1 = \frac{\det(A_1)}{\det(A)} = \frac{5{,}215{,}500}{247{,}434{,}000} = 0.021080 \text{ A}$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="step">
+          <div class="snum m2-num">3</div>
+          <div class="sbody">
+            <div class="op">Calcular $\det(A_2)$ — se reemplaza la <b>columna 2</b> con $b$</div>
+            <div class="math-box">
+              $$A_2 = \begin{pmatrix} 690 & 9 & 0 \\ -470 & 0 & -470 \\ 0 & 0 & 690 \end{pmatrix}$$
+            </div>
+            <div class="math-box">
+              $$\det(A_2) = 9 \cdot (-1)^{1+2} \begin{vmatrix} -470 & -470 \\ 0 & 690 \end{vmatrix}
+              = -9\bigl[(-470)(690) - (-470)(0)\bigr]
+              = -9(-324{,}300) = 2{,}918{,}700$$
+            </div>
+            <div class="math-box">
+              $$I_2 = \frac{2{,}918{,}700}{247{,}434{,}000} = 0.011796 \text{ A}$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="step">
+          <div class="snum m2-num">4</div>
+          <div class="sbody">
+            <div class="op">Calcular $\det(A_3)$ — se reemplaza la <b>columna 3</b> con $b$</div>
+            <div class="math-box">
+              $$A_3 = \begin{pmatrix} 690 & -470 & 9 \\ -470 & 1160 & 0 \\ 0 & -470 & 0 \end{pmatrix}$$
+            </div>
+            <div class="math-box">
+              $$\det(A_3) = 9 \cdot (+1)^{1+3} \begin{vmatrix} -470 & 1160 \\ 0 & -470 \end{vmatrix}
+              = 9\bigl[(-470)(-470) - (1160)(0)\bigr]
+              = 9 \times 220{,}900 = 1{,}988{,}100$$
+            </div>
+            <div class="math-box">
+              $$I_3 = \frac{1{,}988{,}100}{247{,}434{,}000} = 0.008035 \text{ A}$$
+            </div>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <h4>Resultado — Método 2</h4>
+          <div class="result-row">
+            <div class="result-item"><div class="label">$I_1$</div><div class="val">21.1 mA</div></div>
+            <div class="result-item"><div class="label">$I_2$</div><div class="val">11.8 mA</div></div>
+            <div class="result-item"><div class="label">$I_3$</div><div class="val">&nbsp;8.0 mA</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════ -->
+    <!-- MÉTODO 3 — INVERSA DE MATRIZ    -->
+    <!-- ════════════════════════════════ -->
+    <section>
+      <div class="method-header m3-bg">
+        <div class="mnum">03</div>
+        <div>
+          <h2>Inversa de Matriz</h2>
+          <p>$x = A^{-1}b$ &nbsp;donde&nbsp; $A^{-1} = \dfrac{\text{adj}(A)}{\det(A)}$</p>
+        </div>
+      </div>
+      <div class="method-body m3-brd">
+
+        <!-- Paso 1 -->
+        <div class="step">
+          <div class="snum m3-num">1</div>
+          <div class="sbody">
+            <div class="op">Confirmar $\det(A)$ (ya calculado en Método 2)</div>
+            <div class="math-box">
+              $$\det(A) = 247{,}434{,}000 \neq 0 \quad \Rightarrow \quad A^{-1} \text{ existe}$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="step">
+          <div class="snum m3-num">2</div>
+          <div class="sbody">
+            <div class="op">Calcular los <b>9 cofactores</b> de $A$ &nbsp;—&nbsp; $C_{ij} = (-1)^{i+j} M_{ij}$</div>
+            <p style="margin:8px 0 4px;font-size:.88rem;color:#6a5a40;font-style:italic">Fila 1:</p>
+            <div class="math-box">
+              $$C_{11} = (+1)\begin{vmatrix}1160&-470\\-470&690\end{vmatrix}
+              = 1160(690)-(-470)(-470) = 800{,}400-220{,}900 = \mathbf{+579{,}500}$$
+            </div>
+            <div class="math-box">
+              $$C_{12} = (-1)\begin{vmatrix}-470&-470\\0&690\end{vmatrix}
+              = -[(-470)(690)-0] = -(-324{,}300) = \mathbf{+324{,}300}$$
+            </div>
+            <div class="math-box">
+              $$C_{13} = (+1)\begin{vmatrix}-470&1160\\0&-470\end{vmatrix}
+              = (-470)(-470)-(1160)(0) = \mathbf{+220{,}900}$$
+            </div>
+            <p style="margin:8px 0 4px;font-size:.88rem;color:#6a5a40;font-style:italic">Fila 2:</p>
+            <div class="math-box">
+              $$C_{21} = (-1)\begin{vmatrix}-470&0\\-470&690\end{vmatrix}
+              = -[(-470)(690)-0(-470)] = -(-324{,}300) = \mathbf{+324{,}300}$$
+            </div>
+            <div class="math-box">
+              $$C_{22} = (+1)\begin{vmatrix}690&0\\0&690\end{vmatrix}
+              = 690(690)-0 = \mathbf{+476{,}100}$$
+            </div>
+            <div class="math-box">
+              $$C_{23} = (-1)\begin{vmatrix}690&-470\\0&-470\end{vmatrix}
+              = -[(690)(-470)-(-470)(0)] = -(-324{,}300) = \mathbf{+324{,}300}$$
+            </div>
+            <p style="margin:8px 0 4px;font-size:.88rem;color:#6a5a40;font-style:italic">Fila 3:</p>
+            <div class="math-box">
+              $$C_{31} = (+1)\begin{vmatrix}-470&0\\1160&-470\end{vmatrix}
+              = (-470)(-470)-(0)(1160) = \mathbf{+220{,}900}$$
+            </div>
+            <div class="math-box">
+              $$C_{32} = (-1)\begin{vmatrix}690&0\\-470&-470\end{vmatrix}
+              = -[(690)(-470)-0(-470)] = -(-324{,}300) = \mathbf{+324{,}300}$$
+            </div>
+            <div class="math-box">
+              $$C_{33} = (+1)\begin{vmatrix}690&-470\\-470&1160\end{vmatrix}
+              = 690(1160)-(-470)(-470) = 800{,}400-220{,}900 = \mathbf{+579{,}500}$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="step">
+          <div class="snum m3-num">3</div>
+          <div class="sbody">
+            <div class="op">Construir la <b>matriz de cofactores</b> y obtener la <b>adjunta</b> (transpuesta)</div>
+            <div class="math-box">
+              $$\text{Cof}(A) = \begin{pmatrix} 579{,}500 & 324{,}300 & 220{,}900 \\ 324{,}300 & 476{,}100 & 324{,}300 \\ 220{,}900 & 324{,}300 & 579{,}500 \end{pmatrix}$$
+            </div>
+            <p style="text-align:center;margin:6px;font-size:.88rem;color:#6a5a40;font-style:italic">Como $\text{Cof}(A)$ es simétrica, $\text{adj}(A) = [\text{Cof}(A)]^T = \text{Cof}(A)$</p>
+            <div class="math-box">
+              $$\text{adj}(A) = \begin{pmatrix} 579{,}500 & 324{,}300 & 220{,}900 \\ 324{,}300 & 476{,}100 & 324{,}300 \\ 220{,}900 & 324{,}300 & 579{,}500 \end{pmatrix}$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 4 -->
+        <div class="step">
+          <div class="snum m3-num">4</div>
+          <div class="sbody">
+            <div class="op">Calcular $A^{-1} = \dfrac{1}{\det(A)} \cdot \text{adj}(A)$</div>
+            <div class="math-box">
+              $$A^{-1} = \frac{1}{247{,}434{,}000}
+              \begin{pmatrix} 579{,}500 & 324{,}300 & 220{,}900 \\ 324{,}300 & 476{,}100 & 324{,}300 \\ 220{,}900 & 324{,}300 & 579{,}500 \end{pmatrix}$$
+            </div>
+            <div class="math-box">
+              $$A^{-1} \approx \begin{pmatrix} 0.000002342 & 0.000001311 & 0.000000893 \\ 0.000001311 & 0.000001924 & 0.000001311 \\ 0.000000893 & 0.000001311 & 0.000002342 \end{pmatrix}$$
+            </div>
+          </div>
+        </div>
+
+        <!-- Paso 5 -->
+        <div class="step">
+          <div class="snum m3-num">5</div>
+          <div class="sbody">
+            <div class="op">Resolver $x = A^{-1} \cdot b$ &nbsp;donde&nbsp; $b = (9,\,0,\,0)^T$</div>
+            <p style="margin:8px 0 4px;font-size:.9rem">Como $b$ solo tiene el valor 9 en la primera posición, solo interviene la primera columna de $A^{-1}$:</p>
+            <div class="math-box">
+              $$I_1 = \frac{9 \times 579{,}500}{247{,}434{,}000} = \frac{5{,}215{,}500}{247{,}434{,}000} = 0.021080 \text{ A}$$
+            </div>
+            <div class="math-box">
+              $$I_2 = \frac{9 \times 324{,}300}{247{,}434{,}000} = \frac{2{,}918{,}700}{247{,}434{,}000} = 0.011796 \text{ A}$$
+            </div>
+            <div class="math-box">
+              $$I_3 = \frac{9 \times 220{,}900}{247{,}434{,}000} = \frac{1{,}988{,}100}{247{,}434{,}000} = 0.008035 \text{ A}$$
+            </div>
+          </div>
+        </div>
+
+        <div class="result-box">
+          <h4>Resultado — Método 3</h4>
+          <div class="result-row">
+            <div class="result-item"><div class="label">$I_1$</div><div class="val">21.1 mA</div></div>
+            <div class="result-item"><div class="label">$I_2$</div><div class="val">11.8 mA</div></div>
+            <div class="result-item"><div class="label">$I_3$</div><div class="val">&nbsp;8.0 mA</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── RESULTADOS FINALES ─────────── -->
+    <section>
+      <div class="section-label" style="margin-bottom:14px">
+        <div class="tag" style="background:var(--res)">Resultados finales y verificación</div>
+      </div>
+      <table class="final-table">
+        <thead>
+          <tr>
+            <th>Corriente</th>
+            <th>Gauss-Jordan</th>
+            <th>Cramer</th>
+            <th>Inversa $A^{-1}$</th>
+            <th>En mA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>$I_1$</td><td>0.021075 A</td><td>0.021080 A</td><td>0.021080 A</td><td><b>21.1 mA</b></td></tr>
+          <tr><td>$I_2$</td><td>0.011796 A</td><td>0.011796 A</td><td>0.011796 A</td><td><b>11.8 mA</b></td></tr>
+          <tr><td>$I_3$</td><td>0.008035 A</td><td>0.008035 A</td><td>0.008035 A</td><td><b>8.0 mA</b></td></tr>
+        </tbody>
+      </table>
+      <div class="note" style="margin-top:8px;font-size:.84rem;color:#6a5a40;font-style:italic">
+        Las diferencias mínimas entre métodos son por redondeo en pasos intermedios.
+      </div>
+
+      <p style="margin-top:18px;margin-bottom:8px">Sustitución de regreso en las ecuaciones originales:</p>
+      <div class="verify-row">
+        <div class="verify-card">
+          <div class="eq">$E_1$</div>
+          $690(0.02108) - 470(0.01180)$<br>
+          $= 14.545 - 5.546$<br>
+          <span class="chk">$= 9.000$ ✓</span>
+        </div>
+        <div class="verify-card">
+          <div class="eq">$E_2$</div>
+          $-470(0.02108) + 1160(0.01180) - 470(0.00804)$<br>
+          $= -9.908 + 13.688 - 3.779$<br>
+          <span class="chk">$\approx 0$ ✓</span>
+        </div>
+        <div class="verify-card">
+          <div class="eq">$E_3$</div>
+          $-470(0.01180) + 690(0.00804)$<br>
+          $= -5.546 + 5.548$<br>
+          <span class="chk">$\approx 0$ ✓</span>
+        </div>
+      </div>
+    </section>
+
+    <footer style="text-align:center; padding:20px; color:#8a7a60; font-size:.82rem; border-top:2px dashed var(--faint); margin-top:20px;">
+      Circuito de 3 mallas · Ley de Kirchhoff · Universidad del Valle de Guatemala
+      &nbsp;·&nbsp; Álgebra Lineal
+    </footer>
+
+  </div><!-- /content -->
+</div><!-- /notebook -->
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true  },
+        { left: "$",  right: "$",  display: false }
+      ],
+      throwOnError: false
+    });
+  });
+</script>
+</body>
+</html>
